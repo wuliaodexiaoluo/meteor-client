@@ -35,25 +35,12 @@ jobs:
       - name: Build
         run: ./gradlew build -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
 
-      - name: Webhook Failure
-        if: ${{ failure() }}
-        run: |
-          cd .github/devbuilds
-          npm start ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} false
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-
-
-      - name: Publish
-        run: ./gradlew publish -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
-        env:
-          MAVEN_METEOR_ALIAS: ${{ secrets.MAVEN_METEOR_ALIAS }}
-          MAVEN_METEOR_TOKEN: ${{ secrets.MAVEN_METEOR_TOKEN }}
-
-      - name: Upload file & Discord webhook
-        run: |
-          cd .github/devbuilds
-          npm start ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} true
-        env:
-          SERVER_TOKEN: ${{ secrets.SERVER_TOKEN }}
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      # 新增上传工件步骤
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dev-build-${{ steps.dev-build.outputs.number }}
+          path: |
+            build/libs/*.jar  # 指定构建产物的位置
+            !**/node_modules/**  # 排除不需要上传的目录
+          retention-days: 1  # 保存工件的天数
