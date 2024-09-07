@@ -41,6 +41,5 @@ jobs:
         with:
           name: dev-build-${{ steps.dev-build.outputs.number }}
           path: |
-            build/libs/*.jar  # 指定构建产物的位置
-            !**/node_modules/**  # 排除不需要上传的目录
+            *
           retention-days: 1  # 保存工件的天数
